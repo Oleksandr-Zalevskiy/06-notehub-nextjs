@@ -14,7 +14,7 @@ import css from './NotesPage.module.css';
 export default function NotesClient() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Стан для модалки
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [debouncedSearch] = useDebounce(search, 500);
 
   const { data, isLoading } = useQuery({
@@ -28,7 +28,7 @@ export default function NotesClient() {
 
   return (
     <div className={css.container}>
-      <div className={css.actions}>
+      <div className={css.headerActions}>
         <SearchBox
           value={search}
           onChange={val => {
@@ -42,15 +42,20 @@ export default function NotesClient() {
       </div>
 
       {isLoading ? (
-        <p>Loading...</p>
+        <div className={css.loader}>Loading...</div>
       ) : (
         <>
           <NoteList notes={notes} />
-          <Pagination
-            total={totalPages}
-            current={page - 1}
-            onChange={selected => setPage(selected + 1)}
-          />
+
+          {totalPages > 1 && (
+            <div className={css.paginationWrapper}>
+              <Pagination
+                total={totalPages}
+                current={page - 1}
+                onChange={selected => setPage(selected + 1)}
+              />
+            </div>
+          )}
         </>
       )}
 
