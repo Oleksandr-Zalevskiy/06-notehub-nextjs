@@ -1,44 +1,55 @@
 'use client';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNote } from '@/lib/api';
-import { CreateNoteDto } from '@/types/note';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { CreateNoteDto, NoteTag } from '@/types/note';
 import css from './NoteForm.module.css';
 
-const NoteForm = () => {
-  const queryClient = useQueryClient();
+interface NoteFormProps {
+  onSubmit: (values: CreateNoteDto) => void;
+  onCancel: () => void;
+  isSubmitting?: boolean;
+}
 
-  const mutation = useMutation({
-    mutationFn: (newNote: CreateNoteDto) => createNote(newNote),
-    onSuccess: () => {
-      // Оновлюємо кеш, щоб нова нотатка з'явилася в списку
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
-  });
+const validationSchema = Yup.object({
+  title: Yup.string().required('Required'),
+  tag: Yup.string().oneOf(['Work', 'Personal', 'Home', 'Important', 'Other']).required('Required'),
+  content: Yup.string(), // Опціонально
+});
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    const noteData: CreateNoteDto = {
-      title: formData.get('title') as string,
-      content: formData.get('content') as string,
-      tag: formData.get('tag') as string,
-    };
-
-    mutation.mutate(noteData);
-    e.currentTarget.reset();
-  };
+const NoteForm = ({ onSubmit, onCancel, isSubmitting }: NoteFormProps) => {
+  const initialValues: CreateNoteDto = { title: '', tag: 'Other', content: '' };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <input name="title" placeholder="Title" required className={css.input} />
-      <input name="tag" placeholder="Tag" required className={css.input} />
-      <textarea name="content" placeholder="Content" required className={css.textarea} />
-      <button type="submit" disabled={mutation.isPending} className={css.button}>
-        {mutation.isPending ? 'Adding...' : 'Add Note'}
-      </button>
-    </form>
+    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
+      <Form className={css.form}>
+        <Field name="title" placeholder="Title" className={css.input} />
+        <ErrorMessage name="title" component="div" className={css.error} />
+
+        <Field as="select" name="tag" className={css.select}>
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+          <option value="Home">Home</option>
+          <option value="Important">Important</option>
+          <option value="Other">Other</option>
+        </Field>
+
+        <Field
+          name="content"
+          as="textarea"
+          placeholder="Content (Optional)"
+          className={css.textarea}
+        />
+
+        <div className={css.actions}>
+          <button type="submit" disabled={isSubmitting}>
+            Save
+          </button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </Form>
+    </Formik>
   );
 };
 

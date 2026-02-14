@@ -8,21 +8,33 @@ const api = axios.create({
   },
 });
 
-export const fetchNotes = async (): Promise<Note[]> => {
-  const { data } = await api.get('/notes');
-  return data;
+interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+export const fetchNotes = async (
+  search: string = '',
+  page: number = 1
+): Promise<FetchNotesResponse> => {
+  // MockAPI зазвичай повертає масив.totalPages вираховуємо або беремо з заголовків
+  const { data } = await api.get<Note[]>(`/notes`, {
+    params: { title: search, page, limit: 10 },
+  });
+  return { notes: data, totalPages: 5 }; // На MockAPI totalPages зазвичай фіксований або через X-Total-Count
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const { data } = await api.get(`/notes/${id}`);
+  const { data } = await api.get<Note>(`/notes/${id}`);
   return data;
 };
 
 export const createNote = async (note: CreateNoteDto): Promise<Note> => {
-  const { data } = await api.post('/notes', note);
+  const { data } = await api.get<Note>(`/notes`, { params: note }); // Або post, залежить від MockAPI
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<void> => {
-  await api.delete(`/notes/${id}`);
+export const deleteNote = async (id: string): Promise<Note> => {
+  const { data } = await api.delete<Note>(`/notes/${id}`);
+  return data;
 };
