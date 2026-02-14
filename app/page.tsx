@@ -1,14 +1,18 @@
-import Link from 'next/link';
-import css from './Home.module.css';
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
+import { fetchNotes } from '@/lib/api';
+import NotesClient from './Notes.client';
 
-export default function HomePage() {
+export default async function NotesPage() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['notes', '', 1],
+    queryFn: () => fetchNotes('', 1),
+  });
+
   return (
-    <main className={css.container}>
-      <h1 className={css.title}>Welcome to NoteHub</h1>
-      <p className={css.description}>Your personal space for organized thoughts and quick notes.</p>
-      <Link href="/notes" className={css.button}>
-        View My Notes
-      </Link>
-    </main>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <NotesClient />
+    </HydrationBoundary>
   );
 }
