@@ -14,7 +14,7 @@ const validationSchema = Yup.object({
     .min(3, 'Minimum 3 characters')
     .max(50, 'Maximum 50 characters')
     .required('Required'),
-  content: Yup.string().max(500, 'Maximum 500 characters').required('Required'), // Згідно з фідбеком має бути обов'язковим
+  content: Yup.string().max(500, 'Maximum 500 characters'), // ВИДАЛЕНО .required() - тепер поле опціональне
   tag: Yup.string().oneOf(tags, 'Invalid tag').required('Required'),
 });
 
@@ -49,19 +49,19 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
         <Form className={css.form}>
           <div className={css.field}>
             <label htmlFor="title">Title</label>
-            <Field name="title" type="text" />
+            <Field name="title" type="text" id="title" />
             <ErrorMessage name="title" component="div" className={css.error} />
           </div>
 
           <div className={css.field}>
-            <label htmlFor="content">Content</label>
-            <Field name="content" as="textarea" />
+            <label htmlFor="content">Content (Optional)</label>
+            <Field name="content" as="textarea" id="content" />
             <ErrorMessage name="content" component="div" className={css.error} />
           </div>
 
           <div className={css.field}>
             <label htmlFor="tag">Tag</label>
-            <Field name="tag" as="select">
+            <Field name="tag" as="select" id="tag">
               {tags.map(t => (
                 <option key={t} value={t}>
                   {t}
@@ -71,9 +71,15 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
             <ErrorMessage name="tag" component="div" className={css.error} />
           </div>
 
-          <button type="submit" disabled={isSubmitting || mutation.isPending}>
-            {mutation.isPending ? 'Saving...' : 'Create Note'}
-          </button>
+          <div className={css.actions}>
+            <button
+              type="submit"
+              disabled={isSubmitting || mutation.isPending}
+              className={css.submitBtn}
+            >
+              {mutation.isPending ? 'Creating...' : 'Create Note'}
+            </button>
+          </div>
         </Form>
       )}
     </Formik>
