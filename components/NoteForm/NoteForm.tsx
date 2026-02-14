@@ -1,56 +1,81 @@
 'use client';
+
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { CreateNoteDto, NoteTag } from '@/types/note';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNote } from '@/lib/api';
+import { NoteTag, CreateNoteDto } from '@/types/note';
 import css from './NoteForm.module.css';
 
-interface NoteFormProps {
-  onSubmit: (values: CreateNoteDto) => void;
-  onCancel: () => void;
-  isSubmitting?: boolean;
-}
+const tags: NoteTag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
 const validationSchema = Yup.object({
-  title: Yup.string().required('Required'),
-  tag: Yup.string().oneOf(['Work', 'Personal', 'Home', 'Important', 'Other']).required('Required'),
-  content: Yup.string(), // Опціонально
+  title: Yup.string()
+    .min(3, 'Minimum 3 characters')
+    .max(50, 'Maximum 50 characters')
+    .required('Required'),
+  content: Yup.string().max(500, 'Maximum 500 characters').required('Required'), // Згідно з фідбеком має бути обов'язковим
+  tag: Yup.string().oneOf(tags, 'Invalid tag').required('Required'),
 });
 
-const NoteForm = ({ onSubmit, onCancel, isSubmitting }: NoteFormProps) => {
-  const initialValues: CreateNoteDto = { title: '', tag: 'Other', content: '' };
+interface NoteFormProps {
+  onSuccess: () => void;
+}
+
+export default function NoteForm({ onSuccess }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      onSuccess();
+    },
+  });
+
+  const initialValues: CreateNoteDto = {
+    title: '',
+    content: '',
+    tag: 'Work',
+  };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-      <Form className={css.form}>
-        <Field name="title" placeholder="Title" className={css.input} />
-        <ErrorMessage name="title" component="div" className={css.error} />
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={values => mutation.mutate(values)}
+    >
+      {({ isSubmitting }) => (
+        <Form className={css.form}>
+          <div className={css.field}>
+            <label htmlFor="title">Title</label>
+            <Field name="title" type="text" />
+            <ErrorMessage name="title" component="div" className={css.error} />
+          </div>
 
-        <Field as="select" name="tag" className={css.select}>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Home">Home</option>
-          <option value="Important">Important</option>
-          <option value="Other">Other</option>
-        </Field>
+          <div className={css.field}>
+            <label htmlFor="content">Content</label>
+            <Field name="content" as="textarea" />
+            <ErrorMessage name="content" component="div" className={css.error} />
+          </div>
 
-        <Field
-          name="content"
-          as="textarea"
-          placeholder="Content (Optional)"
-          className={css.textarea}
-        />
+          <div className={css.field}>
+            <label htmlFor="tag">Tag</label>
+            <Field name="tag" as="select">
+              {tags.map(t => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </Field>
+            <ErrorMessage name="tag" component="div" className={css.error} />
+          </div>
 
-        <div className={css.actions}>
-          <button type="submit" disabled={isSubmitting}>
-            Save
+          <button type="submit" disabled={isSubmitting || mutation.isPending}>
+            {mutation.isPending ? 'Saving...' : 'Create Note'}
           </button>
-          <button type="button" onClick={onCancel}>
-            Cancel
-          </button>
-        </div>
-      </Form>
+        </Form>
+      )}
     </Formik>
   );
-};
-
-export default NoteForm;
+}

@@ -1,27 +1,31 @@
 import axios from 'axios';
-import { Note, CreateNoteDto } from '../types/note';
+import { Note, CreateNoteDto } from '@/types/note';
 
 const api = axios.create({
-  baseURL: 'https://6709409faf1a1997aaee399e.mockapi.io',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+    Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
   },
 });
 
-interface FetchNotesResponse {
+export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
 
 export const fetchNotes = async (
-  search: string = '',
-  page: number = 1
+  search = '',
+  page = 1,
+  perPage = 6
 ): Promise<FetchNotesResponse> => {
-  // MockAPI зазвичай повертає масив.totalPages вираховуємо або беремо з заголовків
-  const { data } = await api.get<Note[]>(`/notes`, {
-    params: { title: search, page, limit: 10 },
+  const { data } = await api.get<FetchNotesResponse>('/notes', {
+    params: {
+      search,
+      page,
+      perPage,
+    },
   });
-  return { notes: data, totalPages: 5 }; // На MockAPI totalPages зазвичай фіксований або через X-Total-Count
+  return data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
@@ -30,11 +34,12 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
 };
 
 export const createNote = async (note: CreateNoteDto): Promise<Note> => {
-  const { data } = await api.get<Note>(`/notes`, { params: note }); // Або post, залежить від MockAPI
+  const { data } = await api.post<Note>('/notes', note);
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<Note>(`/notes/${id}`);
-  return data;
+export const deleteNote = async (id: string): Promise<void> => {
+  await api.delete(`/notes/${id}`);
 };
+
+export default api;

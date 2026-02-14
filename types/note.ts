@@ -1,12 +1,12 @@
-export type NoteTag = 'Work' | 'Personal' | 'Home' | 'Important' | 'Other';
+export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
 
 export interface Note {
   id: string;
   title: string;
-  content?: string; // Опціонально за ТЗ
+  content: string;
   tag: NoteTag;
   createdAt: string;
-  updatedAt: string; // Додано за вимогою
+  updatedAt?: string;
 }
 
 export type CreateNoteDto = Omit<Note, 'id' | 'createdAt' | 'updatedAt'>;
