@@ -14,7 +14,7 @@ const validationSchema = Yup.object({
     .min(3, 'Minimum 3 characters')
     .max(50, 'Maximum 50 characters')
     .required('Required'),
-  content: Yup.string().max(500, 'Maximum 500 characters'), // ВИДАЛЕНО .required() - тепер поле опціональне
+  content: Yup.string().max(500, 'Maximum 500 characters'),
   tag: Yup.string().oneOf(tags, 'Invalid tag').required('Required'),
 });
 
@@ -54,7 +54,7 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
           </div>
 
           <div className={css.field}>
-            <label htmlFor="content">Content (Optional)</label>
+            <label htmlFor="content">Content</label>
             <Field name="content" as="textarea" id="content" />
             <ErrorMessage name="content" component="div" className={css.error} />
           </div>
@@ -73,9 +73,17 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
 
           <div className={css.actions}>
             <button
+              type="button"
+              className={css.cancelBtn}
+              onClick={onSuccess}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
               type="submit"
-              disabled={isSubmitting || mutation.isPending}
               className={css.submitBtn}
+              disabled={isSubmitting || mutation.isPending}
             >
               {mutation.isPending ? 'Creating...' : 'Create Note'}
             </button>
