@@ -14,7 +14,7 @@ const validationSchema = Yup.object({
     .min(3, 'Minimum 3 characters')
     .max(50, 'Maximum 50 characters')
     .required('Required'),
-  content: Yup.string().max(500, 'Maximum 500 characters'),
+  content: Yup.string().max(500, 'Maximum 500 characters'), // Опціонально (без .required)
   tag: Yup.string().oneOf(tags, 'Invalid tag').required('Required'),
 });
 
@@ -45,23 +45,23 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
       validationSchema={validationSchema}
       onSubmit={values => mutation.mutate(values)}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, isValid, dirty }) => (
         <Form className={css.form}>
           <div className={css.field}>
             <label htmlFor="title">Title</label>
-            <Field name="title" type="text" id="title" />
+            <Field name="title" type="text" id="title" className={css.input} />
             <ErrorMessage name="title" component="div" className={css.error} />
           </div>
 
           <div className={css.field}>
-            <label htmlFor="content">Content</label>
-            <Field name="content" as="textarea" id="content" />
+            <label htmlFor="content">Content (Optional)</label>
+            <Field name="content" as="textarea" id="content" className={css.textarea} />
             <ErrorMessage name="content" component="div" className={css.error} />
           </div>
 
           <div className={css.field}>
             <label htmlFor="tag">Tag</label>
-            <Field name="tag" as="select" id="tag">
+            <Field name="tag" as="select" id="tag" className={css.select}>
               {tags.map(t => (
                 <option key={t} value={t}>
                   {t}
@@ -80,10 +80,11 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
             >
               Cancel
             </button>
+
             <button
               type="submit"
               className={css.submitBtn}
-              disabled={isSubmitting || mutation.isPending}
+              disabled={isSubmitting || mutation.isPending || !(isValid && dirty)}
             >
               {mutation.isPending ? 'Creating...' : 'Create Note'}
             </button>

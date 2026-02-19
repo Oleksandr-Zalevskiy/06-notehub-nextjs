@@ -3,9 +3,17 @@ import { Note, CreateNoteDto } from '@/types/note';
 
 const api = axios.create({
   baseURL: 'https://notehub-public.goit.study/api',
-  headers: {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-  },
+});
+
+api.interceptors.request.use(config => {
+  const token = process.env.NEXT_PUBLIC_API_TOKEN;
+
+  if (token) {
+    const cleanToken = token.replace(/['"]+/g, '').trim();
+    config.headers.Authorization = `Bearer ${cleanToken}`;
+  }
+
+  return config;
 });
 
 export interface FetchNotesResponse {
