@@ -1,4 +1,4 @@
-import css from './Home.module.css'; // Можна використовувати стилі з Home або створити окремі
+import css from './Home.module.css';
 
 export default function Loading() {
   return (

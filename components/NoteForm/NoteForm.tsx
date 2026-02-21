@@ -1,5 +1,3 @@
-'use client';
-
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,7 +12,7 @@ const validationSchema = Yup.object({
     .min(3, 'Minimum 3 characters')
     .max(50, 'Maximum 50 characters')
     .required('Required'),
-  content: Yup.string().max(500, 'Maximum 500 characters'), // Опціонально (без .required)
+  content: Yup.string().max(500, 'Maximum 500 characters'),
   tag: Yup.string().oneOf(tags, 'Invalid tag').required('Required'),
 });
 
@@ -47,19 +45,19 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
     >
       {({ isSubmitting, isValid, dirty }) => (
         <Form className={css.form}>
-          <div className={css.field}>
+          <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
             <Field name="title" type="text" id="title" className={css.input} />
             <ErrorMessage name="title" component="div" className={css.error} />
           </div>
 
-          <div className={css.field}>
+          <div className={css.formGroup}>
             <label htmlFor="content">Content (Optional)</label>
-            <Field name="content" as="textarea" id="content" className={css.textarea} />
+            <Field name="content" as="textarea" id="content" className={css.textarea} rows={4} />
             <ErrorMessage name="content" component="div" className={css.error} />
           </div>
 
-          <div className={css.field}>
+          <div className={css.formGroup}>
             <label htmlFor="tag">Tag</label>
             <Field name="tag" as="select" id="tag" className={css.select}>
               {tags.map(t => (
@@ -74,7 +72,7 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
           <div className={css.actions}>
             <button
               type="button"
-              className={css.cancelBtn}
+              className={css.cancelButton}
               onClick={onSuccess}
               disabled={isSubmitting}
             >
@@ -83,7 +81,7 @@ export default function NoteForm({ onSuccess }: NoteFormProps) {
 
             <button
               type="submit"
-              className={css.submitBtn}
+              className={css.submitButton}
               disabled={isSubmitting || mutation.isPending || !(isValid && dirty)}
             >
               {mutation.isPending ? 'Creating...' : 'Create Note'}
