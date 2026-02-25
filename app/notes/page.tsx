@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { HydrationBoundary, dehydrate, QueryClient } from '@tanstack/react-query';
 import { fetchNotes } from '@/lib/api';
 import NotesClient from './Notes.client';
@@ -11,8 +12,12 @@ export default async function NotesPage() {
   });
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <NotesClient />
-    </HydrationBoundary>
+    <main>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <Suspense fallback={<div>Loading interface...</div>}>
+          <NotesClient />
+        </Suspense>
+      </HydrationBoundary>
+    </main>
   );
 }
