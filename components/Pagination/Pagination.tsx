@@ -1,32 +1,40 @@
-'use client';
-
 import ReactPaginate from 'react-paginate';
-import css from './Pagination.module.css';
+import { useSearchParams, useRouter } from 'next/navigation';
+import styles from './Pagination.module.css';
 
-interface PaginationProps {
-  total: number;
-  current: number;
-  onChange: (selected: number) => void;
+interface Props {
+  totalPages: number;
 }
 
-const Pagination = ({ total, current, onChange }: PaginationProps) => {
-  return (
-    <div className={css.paginationContainer}>
-      <ReactPaginate
-        pageCount={total}
-        forcePage={current}
-        onPageChange={({ selected }) => onChange(selected)}
-        previousLabel={'<'}
-        nextLabel={'>'}
-        breakLabel={'...'}
-        containerClassName={css.pagination}
-        activeClassName={css.active}
-        pageClassName={css.pageItem}
-        previousClassName={css.prevItem}
-        nextClassName={css.nextItem}
-      />
-    </div>
-  );
-};
+export default function Pagination({ totalPages }: Props) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const currentPage = Number(searchParams.get('page')) || 1;
 
-export default Pagination;
+  const handlePageChange = (event: { selected: number }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(event.selected + 1));
+    router.push(`?${params.toString()}`);
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <ReactPaginate
+      pageCount={totalPages}
+      forcePage={currentPage - 1}
+      onPageChange={handlePageChange}
+      containerClassName={styles.pagination}
+      pageClassName={styles.pageItem}
+      pageLinkClassName={styles.pageLink}
+      activeClassName={styles.active}
+      previousClassName={styles.pageItem}
+      nextClassName={styles.pageItem}
+      previousLinkClassName={styles.pageLink}
+      nextLinkClassName={styles.pageLink}
+      disabledClassName={styles.disabled}
+      previousLabel="Previous"
+      nextLabel="Next"
+    />
+  );
+}

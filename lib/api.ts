@@ -1,19 +1,15 @@
 import axios from 'axios';
-import { Note, CreateNoteDto } from '@/types/note';
+import { Note } from '@/types/note';
 
-const api = axios.create({
-  baseURL: 'https://notehub-public.goit.study/api',
-});
+const BASE_URL = 'https://notehub-public.goit.study/api';
 
-api.interceptors.request.use(config => {
-  const token = process.env.NEXT_PUBLIC_API_TOKEN;
+const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
 
-  if (token) {
-    const cleanToken = token.replace(/['"]+/g, '').trim();
-    config.headers.Authorization = `Bearer ${cleanToken}`;
-  }
-
-  return config;
+const instance = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
 });
 
 export interface FetchNotesResponse {
@@ -21,30 +17,24 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
-export const fetchNotes = async (
-  search = '',
-  page = 1,
-  perPage = 6
-): Promise<FetchNotesResponse> => {
-  const { data } = await api.get<FetchNotesResponse>('/notes', {
-    params: { search, page, perPage },
+export const fetchNotes = async (page: number, search = ''): Promise<FetchNotesResponse> => {
+  const { data } = await instance.get('/notes', {
+    params: { page, perPage: 12, search },
   });
   return data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const { data } = await api.get<Note>(`/notes/${id}`);
+  const { data } = await instance.get(`/notes/${id}`);
   return data;
 };
 
-export const createNote = async (note: CreateNoteDto): Promise<Note> => {
-  const { data } = await api.post<Note>('/notes', note);
+export const createNote = async (note: Omit<Note, 'id' | 'createdAt'>) => {
+  const { data } = await instance.post('/notes', note);
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<Note>(`/notes/${id}`);
+export const deleteNote = async (id: string) => {
+  const { data } = await instance.delete(`/notes/${id}`);
   return data;
 };
-
-export default api;
