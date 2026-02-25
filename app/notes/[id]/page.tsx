@@ -1,5 +1,5 @@
 import { HydrationBoundary, dehydrate, QueryClient } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api'; // Переконайся, що така функція є
+import { fetchNoteById } from '@/lib/api';
 import NoteDetailsClient from './NoteDetailsClient';
 
 export default async function NotePage({ params }: { params: { id: string } }) {
