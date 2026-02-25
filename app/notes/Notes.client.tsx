@@ -53,11 +53,7 @@ export default function NotesClient() {
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox
-          defaultValue={search}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => debouncedSearch(e.target.value)}
-        />
-
+        <SearchBox defaultValue={search} onChange={(value: string) => debouncedSearch(value)} />
         <div className={css.paginationWrapper}>
           {data && data.totalPages > 1 && <Pagination totalPages={data.totalPages} />}
         </div>
