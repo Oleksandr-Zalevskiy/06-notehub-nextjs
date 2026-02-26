@@ -22,8 +22,8 @@ export default function NotesClient() {
     placeholderData: keepPreviousData,
   });
 
-  const handleSearch = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+  const handleSearch = useDebouncedCallback((value: string) => {
+    setSearch(value);
     setPage(1);
   }, 500);
 
