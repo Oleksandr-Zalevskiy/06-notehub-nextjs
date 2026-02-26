@@ -30,11 +30,10 @@ export default function NotesClient() {
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox onChange={value => handleSearch(value)} />
+        <SearchBox onChange={value => handleSearch(value)} />{' '}
         {data && data.totalPages > 1 && (
           <Pagination currentPage={page} totalPages={data.totalPages} onPageChange={setPage} />
         )}
-
         <button className={css.createButton} onClick={() => setIsModalOpen(true)} type="button">
           Create note +
         </button>

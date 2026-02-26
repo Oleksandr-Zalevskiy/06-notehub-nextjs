@@ -28,7 +28,7 @@ export default function NoteForm({ onClose }: { onClose: () => void }) {
       initialValues={{ title: '', content: '', tag: 'Todo' }}
       validationSchema={NoteSchema}
       onSubmit={values => {
-        mutation.mutate(values);
+        mutation.mutate(values as any);
       }}
     >
       {({ handleSubmit }) => (
