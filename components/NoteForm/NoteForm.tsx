@@ -1,38 +1,55 @@
 'use client';
 
-import { Formik, Field, ErrorMessage } from 'formik';
+import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNote } from '@/lib/api';
 import css from './NoteForm.module.css';
 
-const NoteSchema = Yup.object().shape({
+export interface NoteFormValues {
+  title: string;
+  content: string;
+  tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+}
+
+interface NoteFormProps {
+  onClose: () => void;
+}
+
+const NoteSchema = Yup.object({
   title: Yup.string().min(3).max(50).required('Required'),
   content: Yup.string().max(500),
   tag: Yup.string().oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']).required('Required'),
 });
 
-export default function NoteForm({ onClose }: { onClose: () => void }) {
+export default function NoteForm({ onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: createNote,
+    mutationFn: (data: NoteFormValues) => createNote(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       onClose();
     },
   });
 
+  const initialValues: NoteFormValues = {
+    title: '',
+    content: '',
+    tag: 'Todo',
+  };
+
   return (
-    <Formik
-      initialValues={{ title: '', content: '', tag: 'Todo' }}
+    <Formik<NoteFormValues>
+      initialValues={initialValues}
       validationSchema={NoteSchema}
-      onSubmit={values => {
-        mutation.mutate(values as any);
+      onSubmit={(values, { resetForm }) => {
+        mutation.mutate(values);
+        resetForm();
       }}
     >
-      {({ handleSubmit }) => (
-        <div className={css.form}>
+      {() => (
+        <Form className={css.form}>
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
             <Field name="title" id="title" className={css.input} />
@@ -61,16 +78,12 @@ export default function NoteForm({ onClose }: { onClose: () => void }) {
             <button type="button" className={css.cancelButton} onClick={onClose}>
               Cancel
             </button>
-            <button
-              type="button"
-              className={css.submitButton}
-              disabled={mutation.isPending}
-              onClick={() => handleSubmit()}
-            >
+
+            <button type="submit" className={css.submitButton} disabled={mutation.isPending}>
               {mutation.isPending ? 'Creating...' : 'Create note'}
             </button>
           </div>
-        </div>
+        </Form>
       )}
     </Formik>
   );

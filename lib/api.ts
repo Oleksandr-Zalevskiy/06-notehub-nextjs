@@ -7,22 +7,25 @@ const instance = axios.create({
 
 instance.interceptors.request.use(config => {
   const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
 export interface FetchNotesResponse {
   notes: Note[];
-  totalNotes: number;
   totalPages: number;
+  currentPage: number;
 }
 
 export const fetchNotes = async (page: number, search: string): Promise<FetchNotesResponse> => {
   const { data } = await instance.get<FetchNotesResponse>('/notes', {
     params: { page, search, perPage: 12 },
   });
+
   return data;
 };
 
@@ -38,6 +41,7 @@ export const createNote = async (
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<void> => {
-  await instance.delete<void>(`/notes/${id}`);
+export const deleteNote = async (id: string): Promise<Note> => {
+  const { data } = await instance.delete<Note>(`/notes/${id}`);
+  return data;
 };
